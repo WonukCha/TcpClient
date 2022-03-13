@@ -18,6 +18,9 @@
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="ChatClient.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RingBuffer.hpp">
@@ -27,6 +30,12 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="SocketClient.hpp">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ChatClient.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketDefine.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -139,9 +139,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ChatClient.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ChatClient.h" />
+    <ClInclude Include="PacketDefine.h" />
     <ClInclude Include="RingBuffer.hpp" />
     <ClInclude Include="RingBufferMutexLock.hpp" />
     <ClInclude Include="SocketClient.hpp" />
