@@ -3,6 +3,12 @@
 
 #include "ChatClient.h"
 
+constexpr int port = 10000;
+const char* ip = "192.168.219.107";
+
+constexpr int clientCount = 10;
+const char* name = "client";
+
 class Test
 {
 public:
@@ -29,12 +35,12 @@ public:
 	{
 		for (unsigned int i = 0; i < pool.size(); i++)
 		{
-			pool[i]->Init("127.0.0.1", 10000);
+			pool[i]->Init(ip, port);
 			if (pool[i]->Connect())
 			{
 				std::string index;
 				index = i;
-				pool[i]->SetPacket(index);
+				pool[i]->SetName(index);
 				pool[i]->Start();
 			}
 			else
@@ -56,47 +62,53 @@ private:
 
 int main(void)
 {
-	Test t;
-	t.Init(99);
-	t.start();
-	
-	printf("아무 키나 누를 때까지 대기합니다\n");
+	//Test t;
+	//t.Init(clientCount);
+	//t.start();
+	//
+	//printf("아무 키나 누를 때까지 대기합니다\n");
+	//while (true)
+	//{
+	//	std::string inputCmd;
+	//	std::getline(std::cin, inputCmd);
+	//
+	//	if (inputCmd == "quit")
+	//	{
+	//		break;
+	//	}
+	//}
+	//
+	//t.end();
+
+	ChatClient chatClient;
+	chatClient.Init(ip, port);
 	while (true)
 	{
-		std::string inputCmd;
-		std::getline(std::cin, inputCmd);
-	
-		if (inputCmd == "quit")
+		if (chatClient.IsConnect())
 		{
-			break;
+			std::this_thread::sleep_for(std::chrono::milliseconds(16));
 		}
+		else
+		{
+			chatClient.Connect();
+			chatClient.SetName(name);
+			chatClient.Start();
+		}
+
+		
+		//printf("아무 키나 누를 때까지 대기합니다\n");
+		//while (true)
+		//{
+		//	std::string inputCmd;
+		//	std::getline(std::cin, inputCmd);
+		//
+		//	if (inputCmd == "quit")
+		//	{
+		//		break;
+		//	}
+		//}
 	}
+	chatClient.End();
 	
-	t.end();
-
-	//ChatClient chatClient;
-	//chatClient.Init("127.0.0.1", 10000);
-	//if (chatClient.Connect())
-	//{
-	//	chatClient.SetPacket("1");
-	//	chatClient.Start();
-	//	printf("아무 키나 누를 때까지 대기합니다\n");
-	//	while (true)
-	//	{
-	//		std::string inputCmd;
-	//		std::getline(std::cin, inputCmd);
-	//
-	//		if (inputCmd == "quit")
-	//		{
-	//			break;
-	//		}
-	//	}
-	//	chatClient.End();
-	//}
-
-	
-	
-	
-
 	return 0;
 }

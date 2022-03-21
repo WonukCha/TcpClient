@@ -1,4 +1,5 @@
 #include "ChatClient.h"
+
 void ChatClient::OnRecive(RingbufferMutexLock* receive, size_t size)
 {
 	receive->GetData(mReceiveBuffer, size);
@@ -14,7 +15,7 @@ void ChatClient::OnDisConnect()
 {
 	std::cout << "OnDisconnect \r\n";
 }
-void ChatClient::SetPacket(std::string name)
+void ChatClient::SetName(std::string name)
 {
 	ZeroMemory(&mChattingPacket, sizeof(mChattingPacket));
 	mChattingPacket.pakcetID = PACKET_ID::PACKET_ID_CLIENT_TO_SERVER_CHATTING;
@@ -69,12 +70,13 @@ void ChatClient::sendProc()
 			size_t sendSize = mSendQueue.GetSize();
 			mSendQueue.GetData(mSendBuffer,sendSize);
 			SendToData(mSendBuffer, sendSize);
-			//std::cout << "SendToData: " << sendSize << "\r\n";
+			std::cout << "SendToData: " << sendSize << "\r\n";
 		}
 	}
 }
 void ChatClient::receiveProc()
 {
+	UINT64 count = 0;
 	bool IsIdle = false;
 	while (true)
 	{
@@ -91,6 +93,13 @@ void ChatClient::receiveProc()
 			PacketHeader header;
 			mReceiveQueue.GetData(&header,sizeof(header),rbuf_opt_e::RBUF_NO_CLEAR);
 
+			if (header.pakcetID != PACKET_ID::PACKET_ID_SERVER_TO_CLIENT_CHATTING
+				|| header.unPacketSize != 779)
+			{
+				mReceiveQueue.GetData(&header, sizeof(header));
+				std::cout <<"BUR SIZE : " << unPacketSize << "\r\n";
+			}
+
 			if (header.unPacketSize > unPacketSize)
 				break;
 			if (header.pakcetID != PACKET_ID::PACKET_ID_SERVER_TO_CLIENT_CHATTING)
@@ -104,7 +113,8 @@ void ChatClient::receiveProc()
 				ULONGLONG cur = GetTickCount64();
 				ULONGLONG result = cur - cp.ulTickCount;
 				//if(result > 1000)
-				//std::cout << "Deley : " << result << "\r\n";
+				count++;
+				std::cout << "Deley : " << result << " GET : " <<count << "\r\n";
 			}
 
 			IsIdle = false;
@@ -117,17 +127,20 @@ void ChatClient::receiveProc()
 }
 void ChatClient::mainProc()
 {
-
+	UINT64 count = 1;
 	while (true)
 	{
 		if (mIsMainThreadRun == false)
 			break;
 
 		mChattingPacket.ulTickCount = GetTickCount64();
+		std::string strCount = std::to_string(count);
+		strcpy_s(mChattingPacket.cChat, strCount.c_str());
+		std::cout << "PUT : " << strCount << "\r\n";
 		mSendQueue.PutData(&mChattingPacket, sizeof(mChattingPacket));
-
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
+		count++;
 	}
 }
 

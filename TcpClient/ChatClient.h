@@ -17,7 +17,7 @@ public:
 	void OnConnect() override;
 	void OnDisConnect() override;
 
-	void SetPacket(std::string name);
+	void SetName(std::string name);
 	void Start();
 	void End();
 
