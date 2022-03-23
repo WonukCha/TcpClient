@@ -18,8 +18,7 @@ void ChatClient::OnDisConnect()
 void ChatClient::SetName(std::string name)
 {
 	ZeroMemory(&mChattingPacket, sizeof(mChattingPacket));
-	mChattingPacket.pakcetID = PACKET_ID::PACKET_ID_CLIENT_TO_SERVER_CHATTING;
-	mChattingPacket.unPacketSize = sizeof(ChattingPacket);
+
 	if (name.size() > NAME_SIZE)
 	{
 		strcpy_s(mChattingPacket.cName, NAME_SIZE - 2 ,name.c_str());
@@ -87,22 +86,22 @@ void ChatClient::receiveProc()
 
 		do
 		{
-			UINT16	unPacketSize = mReceiveQueue.GetSize();
-			if (unPacketSize < sizeof(PacketHeader))
+			UINT16	packetSize = mReceiveQueue.GetSize();
+			if (packetSize < sizeof(PacketHeader))
 				break;
 			PacketHeader header;
 			mReceiveQueue.GetData(&header,sizeof(header),rbuf_opt_e::RBUF_NO_CLEAR);
 
-			if (header.pakcetID != PACKET_ID::PACKET_ID_SERVER_TO_CLIENT_CHATTING
-				|| header.unPacketSize != 779)
+			if (header.pakcetID != PACKET_ID::SERVER_TO_CLIENT_CHATTING
+				|| header.packetSize != 779)
 			{
 				mReceiveQueue.GetData(&header, sizeof(header));
-				std::cout <<"BUR SIZE : " << unPacketSize << "\r\n";
+				std::cout <<"BUR SIZE : " << packetSize << "\r\n";
 			}
 
-			if (header.unPacketSize > unPacketSize)
+			if (header.packetSize > packetSize)
 				break;
-			if (header.pakcetID != PACKET_ID::PACKET_ID_SERVER_TO_CLIENT_CHATTING)
+			if (header.pakcetID != PACKET_ID::SERVER_TO_CLIENT_CHATTING)
 				break;
 
 			ChattingPacket cp;
@@ -125,6 +124,7 @@ void ChatClient::receiveProc()
 			std::this_thread::sleep_for(std::chrono::milliseconds(16));
 	}
 }
+
 void ChatClient::mainProc()
 {
 	UINT64 count = 1;
@@ -136,8 +136,15 @@ void ChatClient::mainProc()
 		mChattingPacket.ulTickCount = GetTickCount64();
 		std::string strCount = std::to_string(count);
 		strcpy_s(mChattingPacket.cChat, strCount.c_str());
+		mChattingPacket.pakcetID = PACKET_ID::CLIENT_TO_SERVER_CHATTING;
+		mChattingPacket.packetSize = sizeof(ChattingPacket);
+		mChattingPacket.compressType = COMPRESS_TYPE::ZLIB;
+		uLongf destLen = 0;
+		memcpy_s(&mCompressBuffer[0], sizeof(mCompressBuffer), &mChattingPacket, sizeof(PacketHeader));
+		compress((Bytef*)(&mCompressBuffer + sizeof(PacketHeader)), &destLen, (Bytef*)(&mChattingPacket + sizeof(PacketHeader)), (sizeof(mChattingPacket) - sizeof(PacketHeader)));
+
 		std::cout << "PUT : " << strCount << "\r\n";
-		mSendQueue.PutData(&mChattingPacket, sizeof(mChattingPacket));
+		mSendQueue.PutData(&mCompressBuffer, sizeof(PacketHeader)+destLen);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 		count++;

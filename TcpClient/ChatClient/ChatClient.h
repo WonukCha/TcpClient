@@ -5,7 +5,7 @@
 #include <string>
 #include <queue>
 
-
+#include "zlib.h"
 #include "SocketClient.hpp"
 #include "RingBufferMutexLock.hpp"
 #include "PacketDefine.h"
@@ -27,6 +27,7 @@ private:
 	void mainProc();
 
 	ChattingPacket mChattingPacket;
+	char mCompressBuffer[USER_BUFFER_SIZE] = { '\0', };
 
 	std::thread mSendThread;
 	bool mIsSendThreadRun = false;

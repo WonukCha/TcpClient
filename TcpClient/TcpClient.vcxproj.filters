@@ -13,30 +13,42 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\ChatClient">
+      <UniqueIdentifier>{7195d2c2-6ee5-455b-9eed-a2db3f704bc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Common">
+      <UniqueIdentifier>{a799bb9e-3d5c-42e7-8b85-84785409bb9d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ChatClient.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="ChatClient\ChatClient.cpp">
+      <Filter>소스 파일\ChatClient</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="RingBuffer.hpp">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="RingBufferMutexLock.hpp">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
     <ClInclude Include="SocketClient.hpp">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ChatClient.h">
-      <Filter>소스 파일</Filter>
+    <ClInclude Include="ChatClient\ChatClient.h">
+      <Filter>소스 파일\ChatClient</Filter>
     </ClInclude>
-    <ClInclude Include="PacketDefine.h">
-      <Filter>소스 파일</Filter>
+    <ClInclude Include="ChatClient\PacketDefine.h">
+      <Filter>소스 파일\ChatClient</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\RingBuffer.hpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\RingBufferMutexLock.hpp">
+      <Filter>소스 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\zconf.h">
+      <Filter>소스 파일\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\zlib.h">
+      <Filter>소스 파일\Common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
