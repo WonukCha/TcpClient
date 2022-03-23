@@ -93,7 +93,7 @@ void ChatClient::receiveProc()
 			mReceiveQueue.GetData(&header,sizeof(header),rbuf_opt_e::RBUF_NO_CLEAR);
 
 			if (header.pakcetID != PACKET_ID::SERVER_TO_CLIENT_CHATTING
-				|| header.packetSize != 779)
+				|| header.packetSize != sizeof(ChattingPacket))
 			{
 				mReceiveQueue.GetData(&header, sizeof(header));
 				std::cout <<"BUR SIZE : " << packetSize << "\r\n";
@@ -137,14 +137,16 @@ void ChatClient::mainProc()
 		std::string strCount = std::to_string(count);
 		strcpy_s(mChattingPacket.cChat, strCount.c_str());
 		mChattingPacket.pakcetID = PACKET_ID::CLIENT_TO_SERVER_CHATTING;
-		mChattingPacket.packetSize = sizeof(ChattingPacket);
 		mChattingPacket.compressType = COMPRESS_TYPE::ZLIB;
-		uLongf destLen = 0;
+		uLongf destLen = sizeof(mCompressBuffer);
+		int result = compress((Bytef*)(mCompressBuffer + sizeof(PacketHeader)), &destLen, 
+			(Bytef*)(&mChattingPacket.cName), (sizeof(mChattingPacket) - sizeof(PacketHeader)));
+
+		mChattingPacket.packetSize = sizeof(PacketHeader) + destLen;
 		memcpy_s(&mCompressBuffer[0], sizeof(mCompressBuffer), &mChattingPacket, sizeof(PacketHeader));
-		compress((Bytef*)(&mCompressBuffer + sizeof(PacketHeader)), &destLen, (Bytef*)(&mChattingPacket + sizeof(PacketHeader)), (sizeof(mChattingPacket) - sizeof(PacketHeader)));
 
 		std::cout << "PUT : " << strCount << "\r\n";
-		mSendQueue.PutData(&mCompressBuffer, sizeof(PacketHeader)+destLen);
+		mSendQueue.PutData(&mCompressBuffer, mChattingPacket.packetSize);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 		count++;
