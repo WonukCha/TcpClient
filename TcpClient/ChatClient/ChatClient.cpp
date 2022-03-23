@@ -86,26 +86,25 @@ void ChatClient::receiveProc()
 
 		do
 		{
-			UINT16	packetSize = mReceiveQueue.GetSize();
-			if (packetSize < sizeof(PacketHeader))
+			UINT16	queueSize = mReceiveQueue.GetSize();
+			if (queueSize < sizeof(PacketHeader))
 				break;
 			PacketHeader header;
 			mReceiveQueue.GetData(&header,sizeof(header),rbuf_opt_e::RBUF_NO_CLEAR);
 
-			if (header.pakcetID != PACKET_ID::SERVER_TO_CLIENT_CHATTING
-				|| header.packetSize != sizeof(ChattingPacket))
-			{
-				mReceiveQueue.GetData(&header, sizeof(header));
-				std::cout <<"BUR SIZE : " << packetSize << "\r\n";
-			}
-
-			if (header.packetSize > packetSize)
+			if (header.packetSize > queueSize)
 				break;
 			if (header.pakcetID != PACKET_ID::SERVER_TO_CLIENT_CHATTING)
 				break;
 
+			memset(&mReceiveCompressBuffer, 0, sizeof(mReceiveCompressBuffer));
+
 			ChattingPacket cp;
-			mReceiveQueue.GetData(&cp, sizeof(cp));
+			mReceiveQueue.GetData(&cp, sizeof(PacketHeader));
+			mReceiveQueue.GetData(&mReceiveCompressBuffer, header.packetSize - sizeof(PacketHeader));
+			uLongf destSize = sizeof(cp) - sizeof(PacketHeader);
+			uLong size = header.packetSize - sizeof(PacketHeader);
+			int result = uncompress((Bytef*)(cp.cName), &destSize, (Bytef*)&mReceiveCompressBuffer, size);
 
 			if (strcmp(cp.cName, mChattingPacket.cName) == 0)
 			{
@@ -132,21 +131,23 @@ void ChatClient::mainProc()
 	{
 		if (mIsMainThreadRun == false)
 			break;
+		memset(&mSendCompressBuffer, 0, sizeof(mSendCompressBuffer));
 
 		mChattingPacket.ulTickCount = GetTickCount64();
 		std::string strCount = std::to_string(count);
 		strcpy_s(mChattingPacket.cChat, strCount.c_str());
+
 		mChattingPacket.pakcetID = PACKET_ID::CLIENT_TO_SERVER_CHATTING;
 		mChattingPacket.compressType = COMPRESS_TYPE::ZLIB;
-		uLongf destLen = sizeof(mCompressBuffer);
-		int result = compress((Bytef*)(mCompressBuffer + sizeof(PacketHeader)), &destLen, 
+		uLongf destLen = sizeof(mSendCompressBuffer);
+		int result = compress((Bytef*)(mSendCompressBuffer + sizeof(PacketHeader)), &destLen, 
 			(Bytef*)(&mChattingPacket.cName), (sizeof(mChattingPacket) - sizeof(PacketHeader)));
 
 		mChattingPacket.packetSize = sizeof(PacketHeader) + destLen;
-		memcpy_s(&mCompressBuffer[0], sizeof(mCompressBuffer), &mChattingPacket, sizeof(PacketHeader));
+		memcpy_s(&mSendCompressBuffer[0], sizeof(mSendCompressBuffer), &mChattingPacket, sizeof(PacketHeader));
 
 		std::cout << "PUT : " << strCount << "\r\n";
-		mSendQueue.PutData(&mCompressBuffer, mChattingPacket.packetSize);
+		mSendQueue.PutData(&mSendCompressBuffer, mChattingPacket.packetSize);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 		count++;

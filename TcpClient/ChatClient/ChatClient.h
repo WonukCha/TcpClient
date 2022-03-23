@@ -27,7 +27,9 @@ private:
 	void mainProc();
 
 	ChattingPacket mChattingPacket;
-	char mCompressBuffer[USER_BUFFER_SIZE] = { '\0', };
+	char mSendCompressBuffer[USER_BUFFER_SIZE] = { '\0', };
+	char mReceiveCompressBuffer[USER_BUFFER_SIZE] = { '\0', };
+
 
 	std::thread mSendThread;
 	bool mIsSendThreadRun = false;
