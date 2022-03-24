@@ -9,6 +9,7 @@ const char* ip = "192.168.219.107";
 constexpr int clientCount = 10;
 const char* name = "client";
 
+
 class Test
 {
 public:
@@ -62,24 +63,27 @@ private:
 
 int main(void)
 {
-	//Test t;
-	//t.Init(clientCount);
-	//t.start();
-	//
-	//printf("아무 키나 누를 때까지 대기합니다\n");
-	//while (true)
-	//{
-	//	std::string inputCmd;
-	//	std::getline(std::cin, inputCmd);
-	//
-	//	if (inputCmd == "quit")
-	//	{
-	//		break;
-	//	}
-	//}
-	//
-	//t.end();
+#ifdef MULTI
 
+	Test t;
+	t.Init(clientCount);
+	t.start();
+	
+	printf("아무 키나 누를 때까지 대기합니다\n");
+	while (true)
+	{
+		std::string inputCmd;
+		std::getline(std::cin, inputCmd);
+	
+		if (inputCmd == "quit")
+		{
+			break;
+		}
+	}
+	
+	t.end();
+
+#else
 	ChatClient chatClient;
 	chatClient.Init(ip, port);
 	while (true)
@@ -94,21 +98,9 @@ int main(void)
 			chatClient.SetName(name);
 			chatClient.Start();
 		}
-
-		
-		//printf("아무 키나 누를 때까지 대기합니다\n");
-		//while (true)
-		//{
-		//	std::string inputCmd;
-		//	std::getline(std::cin, inputCmd);
-		//
-		//	if (inputCmd == "quit")
-		//	{
-		//		break;
-		//	}
-		//}
 	}
 	chatClient.End();
-	
+
+#endif // MUITI
 	return 0;
 }
