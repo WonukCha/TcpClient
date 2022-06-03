@@ -3,10 +3,10 @@
 
 #include "ChatClient.h"
 
-constexpr int port = 10000;
-const char* ip = "192.168.219.107";
+constexpr int port = 6000;
+const char* ip = "127.0.0.1";
 
-constexpr int clientCount = 10;
+constexpr int clientCount = 100;
 const char* name = "client";
 
 

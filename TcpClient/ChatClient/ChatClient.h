@@ -10,6 +10,10 @@
 #include "RingBufferMutexLock.hpp"
 #include "PacketDefine.h"
 
+#define MULTI 1
+
+constexpr uint16_t USER_BUFFER_SIZE = 1024;
+
 class ChatClient : public SocketClient
 {
 public:
@@ -26,7 +30,7 @@ private:
 	void receiveProc();
 	void mainProc();
 
-	ChattingPacket mChattingPacket;
+	ALL_USER_CHAT_REQUEST mChattingPacket;
 	char mSendCompressBuffer[USER_BUFFER_SIZE] = { '\0', };
 	char mReceiveCompressBuffer[USER_BUFFER_SIZE] = { '\0', };
 

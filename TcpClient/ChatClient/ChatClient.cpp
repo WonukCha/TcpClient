@@ -21,11 +21,11 @@ void ChatClient::SetName(std::string name)
 
 	if (name.size() > NAME_SIZE)
 	{
-		strcpy_s(mChattingPacket.cName, NAME_SIZE - 2 ,name.c_str());
+		strcpy_s(mChattingPacket.CheckCode, NAME_SIZE - 2 ,name.c_str());
 	}
 	else
 	{
-		strcpy_s(mChattingPacket.cName, name.c_str());
+		strcpy_s(mChattingPacket.CheckCode, name.c_str());
 	}
 }
 void ChatClient::Start()
@@ -89,29 +89,29 @@ void ChatClient::receiveProc()
 		do
 		{
 			UINT16	queueSize = mReceiveQueue.GetSize();
-			if (queueSize < sizeof(PacketHeader))
+			if (queueSize < sizeof(PACKET_HEADER))
 				break;
-			PacketHeader header;
+			PACKET_HEADER header;
 			mReceiveQueue.GetData(&header,sizeof(header),rbuf_opt_e::RBUF_NO_CLEAR);
 
 			if (header.packetSize > queueSize)
 				break;
-			if (header.pakcetID != PACKET_ID::SERVER_TO_CLIENT_CHATTING)
+			if (header.pakcetID != PACKET_ID::ALL_USER_CHAT_NOTIFY)
 				break;
 
 			memset(&mReceiveCompressBuffer, 0, sizeof(mReceiveCompressBuffer));
 
-			ChattingPacket cp;
-			mReceiveQueue.GetData(&cp, sizeof(PacketHeader));
-			mReceiveQueue.GetData(&mReceiveCompressBuffer, header.packetSize - sizeof(PacketHeader));
-			uLongf destSize = sizeof(cp) - sizeof(PacketHeader);
-			uLong size = header.packetSize - sizeof(PacketHeader);
-			int result = uncompress((Bytef*)(cp.cName), &destSize, (Bytef*)&mReceiveCompressBuffer, size);
+			ALL_USER_CHAT_REQUEST cp;
+			mReceiveQueue.GetData(&cp, sizeof(PACKET_HEADER));
+			mReceiveQueue.GetData(&mReceiveCompressBuffer, header.packetSize - sizeof(PACKET_HEADER));
+			uLongf destSize = sizeof(cp) - sizeof(PACKET_HEADER);
+			uLong size = header.packetSize - sizeof(PACKET_HEADER);
+			int result = uncompress((Bytef*)(cp.CheckCode), &destSize, (Bytef*)&mReceiveCompressBuffer, size);
 
-			if (strcmp(cp.cName, mChattingPacket.cName) == 0)
+			if (strcmp(cp.CheckCode, mChattingPacket.CheckCode) == 0)
 			{
 				ULONGLONG cur = GetTickCount64();
-				ULONGLONG result = cur - cp.ulTickCount;
+				ULONGLONG result = cur - cp.tickCount;
 				//if(result > 1000)
 				count++;
 #ifdef MULTI
@@ -137,18 +137,18 @@ void ChatClient::mainProc()
 			break;
 		memset(&mSendCompressBuffer, 0, sizeof(mSendCompressBuffer));
 
-		mChattingPacket.ulTickCount = GetTickCount64();
+		mChattingPacket.tickCount = GetTickCount64();
 		std::string strCount = std::to_string(count);
-		strcpy_s(mChattingPacket.cChat, strCount.c_str());
+		strcpy_s(mChattingPacket.Msg, strCount.c_str());
 
-		mChattingPacket.pakcetID = PACKET_ID::CLIENT_TO_SERVER_CHATTING;
+		mChattingPacket.pakcetID = PACKET_ID::ALL_USER_CHAT_REQUEST;
 		mChattingPacket.compressType = COMPRESS_TYPE::ZLIB;
 		uLongf destLen = sizeof(mSendCompressBuffer);
-		int result = compress((Bytef*)(mSendCompressBuffer + sizeof(PacketHeader)), &destLen, 
-			(Bytef*)(&mChattingPacket.cName), (sizeof(mChattingPacket) - sizeof(PacketHeader)));
+		int result = compress((Bytef*)(mSendCompressBuffer + sizeof(PACKET_HEADER)), &destLen,
+			(Bytef*)(&mChattingPacket.CheckCode), (sizeof(mChattingPacket) - sizeof(PACKET_HEADER)));
 
-		mChattingPacket.packetSize = sizeof(PacketHeader) + destLen;
-		memcpy_s(&mSendCompressBuffer[0], sizeof(mSendCompressBuffer), &mChattingPacket, sizeof(PacketHeader));
+		mChattingPacket.packetSize = sizeof(PACKET_HEADER) + destLen;
+		memcpy_s(&mSendCompressBuffer[0], sizeof(mSendCompressBuffer), &mChattingPacket, sizeof(PACKET_HEADER));
 
 #ifdef MULTI
 		std::cout << "PUT : " << strCount << "\r\n";
