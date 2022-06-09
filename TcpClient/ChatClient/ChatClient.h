@@ -10,7 +10,7 @@
 #include "RingBufferMutexLock.hpp"
 #include "PacketDefine.h"
 
-#define MULTI 1
+#define SINGLE 1
 
 constexpr uint16_t USER_BUFFER_SIZE = 1024;
 

@@ -69,7 +69,7 @@ void ChatClient::sendProc()
 			size_t sendSize = mSendQueue.GetSize();
 			mSendQueue.GetData(mSendBuffer,sendSize);
 			SendToData(mSendBuffer, sendSize);
-#ifdef MULTI
+#ifdef SINGLE
 			std::cout << "SendToData: " << sendSize << "\r\n";
 #endif
 		}
@@ -114,7 +114,7 @@ void ChatClient::receiveProc()
 				ULONGLONG result = cur - cp.tickCount;
 				//if(result > 1000)
 				count++;
-#ifdef MULTI
+#ifdef SINGLE
 				std::cout << "Deley : " << result << " GET : " << count << "\r\n";
 #endif
 			}
@@ -150,7 +150,7 @@ void ChatClient::mainProc()
 		mChattingPacket.packetSize = sizeof(PACKET_HEADER) + destLen;
 		memcpy_s(&mSendCompressBuffer[0], sizeof(mSendCompressBuffer), &mChattingPacket, sizeof(PACKET_HEADER));
 
-#ifdef MULTI
+#ifdef SINGLE
 		std::cout << "PUT : " << strCount << "\r\n";
 #endif
 		mSendQueue.PutData(&mSendCompressBuffer, mChattingPacket.packetSize);

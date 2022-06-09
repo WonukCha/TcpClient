@@ -4,6 +4,7 @@
 #include <string>
 #include <filesystem>
 
+
 #include "ChatClient.h"
 
 //constexpr int port = 6000;
@@ -11,6 +12,7 @@
 
 constexpr int clientCount = 100;
 const char* name = "client";
+
 
 class Test
 {
@@ -45,7 +47,7 @@ public:
 			WritePrivateProfileString(L"ServerInfo", L"PORT", L"10000", path.c_str());
 		}
 		memset(cBuf, 0x00, sizeof(cBuf));
-		GetPrivateProfileString(L"ServerInfo", L"PORT", L"10000", cBuf, 256, path.c_str());
+		GetPrivateProfileString(L"ServerInfo", L"PORT", L"6000", cBuf, 256, path.c_str());
 		mPort = _wtoi(cBuf);
 
 		memset(cBuf, 0x00, sizeof(cBuf));
@@ -68,7 +70,11 @@ public:
 			if (pool[i]->Connect())
 			{
 				std::string index;
+#ifdef SINGLE
+				index = "-1";
+#else
 				index = i;
+#endif
 				pool[i]->SetName(index);
 				pool[i]->Start();
 			}
@@ -91,10 +97,13 @@ private:
 
 int main(void)
 {
-#ifdef MULTI
-
 	Test t;
+#ifdef SINGLE
+	t.Init(1);
+#else
 	t.Init(clientCount);
+#endif
+	
 	t.start();
 	
 	printf("아무 키나 누를 때까지 대기합니다\n");
@@ -110,25 +119,5 @@ int main(void)
 	}
 	
 	t.end();
-
-#else
-	ChatClient chatClient;
-	chatClient.Init(ip, port);
-	while (true)
-	{
-		if (chatClient.IsConnect())
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(16));
-		}
-		else
-		{
-			chatClient.Connect();
-			chatClient.SetName(name);
-			chatClient.Start();
-		}
-	}
-	chatClient.End();
-
-#endif // MUITI
 	return 0;
 }
